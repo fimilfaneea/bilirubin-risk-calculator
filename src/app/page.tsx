@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { getBilirubinLevel } from "./bilirubin";
 
 const AgeInput = ({
   formData,
@@ -25,25 +26,43 @@ const AgeInput = ({
         Age ({isHours ? "in hours" : "in days"})
       </label>
       <div className="flex items-center space-x-2 mb-2">
-  <button
-    onClick={() => setIsHours((prev) => !prev)}
-    className={`px-4 py-2 rounded-full ${
-      isHours ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"
-    } focus:outline-none focus:ring focus:border-blue-300`}
-  >
-    {isHours ? "Hours" : "Days"}
-  </button>
-</div>
-      <input
-        type="number"
-        name="age"
-        value={isHours ? formData.age : formData.age / 24}
-        onChange={handleAgeChange}
-        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        required
-        min="0"
-        step="0.1"
-      />
+        <button
+          onClick={() => setIsHours((prev) => !prev)}
+          className={`px-4 py-2 rounded-full ${
+            isHours ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"
+          } focus:outline-none focus:ring focus:border-blue-300`}
+        >
+          {isHours ? "Hours" : "Days"}
+        </button>
+      </div>
+      <div className="relative">
+        <input
+          type="number"
+          name="age"
+          value={
+            isHours
+              ? formData.age
+              : formData.age !== "" &&
+                formData.age !== undefined &&
+                formData.age !== null
+              ? formData.age / 24
+              : ""
+          } // Important change here
+          onChange={handleAgeChange}
+          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black pr-16"
+          required
+          min="0"
+          step="0.1"
+          placeholder={isHours ? "Enter age in hours" : "Enter age in days"}
+        />
+        {formData.age !== "" &&
+          formData.age !== undefined &&
+          formData.age !== null && (
+            <span className="absolute inset-y-0 right-2 flex items-center text-gray-500">
+              {isHours ? "hours" : "days"}
+            </span>
+          )}
+      </div>
     </div>
   );
 };
@@ -62,7 +81,7 @@ export default function Home() {
       clinicalInstability: boolean;
     };
   }>({
-    gestationalAge: "",
+    gestationalAge: "Select ",
     age: "",
     tsbLevel: null, // Initial value remains null
     riskFactors: {
@@ -74,7 +93,6 @@ export default function Home() {
       clinicalInstability: false,
     },
   });
-  
 
   const [showTSB, setShowTSB] = useState(false); // Control visibility of TSB output
 
@@ -113,8 +131,23 @@ export default function Home() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Placeholder: You will handle the TSB calculation here
-    const calculatedTSB = 0; // Replace this with actual calculation
+    // Calculate risk factor count
+    const riskFactorCount = Object.values(formData.riskFactors).filter(
+      Boolean
+    ).length;
+
+    // Convert gestational age to number
+    const gestationalAge = parseInt(formData.gestationalAge);
+
+    // Get postnatal age in hours
+    const postnatalAge = parseFloat(formData.age);
+
+    // Calculate TSB level using the bilirubin function
+    const calculatedTSB = getBilirubinLevel(
+      riskFactorCount,
+      gestationalAge,
+      postnatalAge
+    );
 
     setFormData((prev) => ({ ...prev, tsbLevel: calculatedTSB }));
     setShowTSB(true);
@@ -130,28 +163,35 @@ export default function Home() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Gestational Age Dropdown */}
           <div>
-  <label className="block text-sm font-medium text-gray-700 mb-2">
-    Gestational Age (weeks)
-  </label>
-  <input
-    type="range"
-    name="gestationalAge"
-    min="23"
-    max="40"
-    value={formData.gestationalAge === "40+" ? "40" : formData.gestationalAge}
-    onChange={(e) => {
-      const value = parseInt(e.target.value, 10);
-      setFormData({
-        ...formData,
-        gestationalAge: value === 40 && formData.gestationalAge === "40+" ? "40+" : String(value),
-      });
-    }}
-    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-  />
-  <p className="mt-2 text-lg text-gray-500 text-center">
-    {formData.gestationalAge} weeks
-  </p>
-</div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Gestational Age (weeks)
+            </label>
+            <input
+              type="range"
+              name="gestationalAge"
+              min="23"
+              max="40"
+              value={
+                formData.gestationalAge === "40+"
+                  ? "40"
+                  : formData.gestationalAge
+              }
+              onChange={(e) => {
+                const value = parseInt(e.target.value, 10);
+                setFormData({
+                  ...formData,
+                  gestationalAge:
+                    value === 40 && formData.gestationalAge === "40+"
+                      ? "40+"
+                      : String(value),
+                });
+              }}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+            />
+            <p className="mt-2 text-lg text-gray-500 text-center">
+              {formData.gestationalAge} weeks
+            </p>
+          </div>
 
           {/* Age Input */}
           <AgeInput formData={formData} setFormData={setFormData} />
