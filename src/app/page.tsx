@@ -87,7 +87,6 @@ export default function Home() {
     },
   });
 
-  const [showTSB, setShowTSB] = useState(false);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { name: keyof FormData; value: string | number | RiskFactors }
@@ -127,7 +126,6 @@ export default function Home() {
 
     const calculatedTSB = getBilirubinLevel(riskFactorCount, gestationalAge, postnatalAge);
     setFormData((prev) => ({ ...prev, tsbLevel: calculatedTSB }));
-    setShowTSB(true);
   };
 
   return (
