@@ -25,16 +25,15 @@ const AgeInput = ({
         Age ({isHours ? "in hours" : "in days"})
       </label>
       <div className="flex items-center space-x-2 mb-2">
-        <input
-          type="checkbox"
-          checked={!isHours}
-          onChange={() => setIsHours((prev) => !prev)}
-          className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-        />
-        <span className="text-gray-700">
-          {isHours ? "Switch to Days" : "Switch to Hours"}
-        </span>
-      </div>
+  <button
+    onClick={() => setIsHours((prev) => !prev)}
+    className={`px-4 py-2 rounded-full ${
+      isHours ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"
+    } focus:outline-none focus:ring focus:border-blue-300`}
+  >
+    {isHours ? "Hours" : "Days"}
+  </button>
+</div>
       <input
         type="number"
         name="age"
@@ -50,10 +49,22 @@ const AgeInput = ({
 };
 
 export default function Home() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    gestationalAge: string;
+    age: string;
+    tsbLevel: number | null; // Allow both number and null
+    riskFactors: {
+      gestationalAgeUnder38: boolean;
+      albuminUnder3: boolean;
+      g6pdDeficiency: boolean;
+      hemolyticDisease: boolean;
+      sepsis: boolean;
+      clinicalInstability: boolean;
+    };
+  }>({
     gestationalAge: "",
     age: "",
-    tsbLevel: "",
+    tsbLevel: null, // Initial value remains null
     riskFactors: {
       gestationalAgeUnder38: false,
       albuminUnder3: false,
@@ -63,6 +74,9 @@ export default function Home() {
       clinicalInstability: false,
     },
   });
+  
+
+  const [showTSB, setShowTSB] = useState(false); // Control visibility of TSB output
 
   const handleInputChange = (
     e:
@@ -98,7 +112,12 @@ export default function Home() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+
+    // Placeholder: You will handle the TSB calculation here
+    const calculatedTSB = 0; // Replace this with actual calculation
+
+    setFormData((prev) => ({ ...prev, tsbLevel: calculatedTSB }));
+    setShowTSB(true);
   };
 
   return (
@@ -111,48 +130,35 @@ export default function Home() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Gestational Age Dropdown */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Gestational Age (weeks)
-            </label>
-            <select
-              name="gestationalAge"
-              value={formData.gestationalAge}
-              onChange={handleInputChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-              required
-            >
-              <option value="">Select gestational age</option>
-              {[...Array(18)].map((_, i) => (
-                <option key={i} value={23 + i}>
-                  {23 + i} weeks
-                </option>
-              ))}
-              <option value="40+">≥40 weeks</option>
-            </select>
-          </div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Gestational Age (weeks)
+  </label>
+  <input
+    type="range"
+    name="gestationalAge"
+    min="23"
+    max="40"
+    value={formData.gestationalAge === "40+" ? "40" : formData.gestationalAge}
+    onChange={(e) => {
+      const value = parseInt(e.target.value, 10);
+      setFormData({
+        ...formData,
+        gestationalAge: value === 40 && formData.gestationalAge === "40+" ? "40+" : String(value),
+      });
+    }}
+    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+  />
+  <p className="mt-2 text-lg text-gray-500 text-center">
+    {formData.gestationalAge} weeks
+  </p>
+</div>
 
           {/* Age Input */}
           <AgeInput formData={formData} setFormData={setFormData} />
 
-          {/* TSB Level Input */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Total Serum Bilirubin (TSB) level (mg/dL)
-            </label>
-            <input
-              type="number"
-              name="tsbLevel"
-              value={formData.tsbLevel}
-              onChange={handleInputChange}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              required
-              min="0"
-              step="0.1"
-            />
-          </div>
-
-          {/* Risk Factors (Hidden if gestationalAge ≤ 34 weeks) */}
-         { formData.gestationalAge === "" || Number(formData.gestationalAge) > 34 ? (
+          {/* Risk Factors (Visible if gestationalAge is empty or > 34 weeks) */}
+          {formData.gestationalAge === "" ||
+          Number(formData.gestationalAge) > 34 ? (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Risk Factors
@@ -188,7 +194,7 @@ export default function Home() {
                 </label>
               </div>
             </div>
-          ):null}
+          ) : null}
 
           <button
             type="submit"
@@ -197,8 +203,15 @@ export default function Home() {
             Submit
           </button>
         </form>
+
+        {/* Display TSB Level after Submission */}
+        {showTSB && (
+          <div className="mt-6 p-4 bg-gray-100 rounded-md text-lg font-semibold">
+            <span className="text-gray-700">Calculated TSB Level:</span>{" "}
+            <span className="text-blue-600">{formData.tsbLevel} mg/dL</span>
+          </div>
+        )}
       </div>
     </main>
   );
 }
-  

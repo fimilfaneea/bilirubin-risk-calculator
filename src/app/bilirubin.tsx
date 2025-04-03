@@ -37,7 +37,7 @@ const bilirubinLevelsNoRisk: Record<number, number[][]> = {
   ],
 };
 
-const getBilirubinLevel = (
+export const getBilirubinLevel = (
   riskFactorCount: number,
   gestationalAge: number,
   postnatalAge: number
