@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getBilirubinLevel } from "./bilirubin";
+import { Box, Text } from "@chakra-ui/react";
 
 type RiskFactors = {
   gestationalAgeUnder38: boolean;
@@ -87,7 +88,6 @@ export default function Home() {
     },
   });
 
-
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { name: keyof FormData; value: string | number | RiskFactors }
   ) => {
@@ -131,6 +131,24 @@ export default function Home() {
   return (
     <main className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+
+        {/* LinkedIn Button at the Top */}
+        <Box textAlign="right" borderBottom="1px solid" mb={4}>
+          <Text fontSize="sm" mt={3}>
+            Created by{" "}
+            <Box
+              as="a"
+              href="https://www.linkedin.com/in/fimilfaneea/"
+              target="_blank"
+              color="blue.500"
+              fontWeight="bold"
+              _hover={{ textDecoration: "underline" }}
+            >
+              Fimil
+            </Box>
+          </Text>
+        </Box>
+
         <h1 className="text-2xl font-bold text-black mb-6">Bilirubin Risk Assessment</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
