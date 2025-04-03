@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { getBilirubinLevel } from "./bilirubin";
-import { Box, Text } from "@chakra-ui/react";
+import { Link } from "@chakra-ui/react";
 
 type RiskFactors = {
   gestationalAgeUnder38: boolean;
@@ -55,7 +55,9 @@ const AgeInput = ({ formData, setFormData }: AgeInputProps) => {
         <input
           type="number"
           name="age"
-          value={isHours ? formData.age : (parseFloat(formData.age) / 24).toString()}
+          value={
+            isHours ? formData.age : (parseFloat(formData.age) / 24).toString()
+          }
           onChange={handleAgeChange}
           className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black pr-16"
           required
@@ -89,7 +91,9 @@ export default function Home() {
   });
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { name: keyof FormData; value: string | number | RiskFactors }
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      | { name: keyof FormData; value: string | number | RiskFactors }
   ) => {
     if ("target" in e) {
       const { name, value, type } = e.target;
@@ -120,66 +124,82 @@ export default function Home() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const riskFactorCount = Object.values(formData.riskFactors).filter(Boolean).length;
+    const riskFactorCount = Object.values(formData.riskFactors).filter(
+      Boolean
+    ).length;
     const gestationalAge = parseInt(formData.gestationalAge, 10);
     const postnatalAge = parseFloat(formData.age);
 
-    const calculatedTSB = getBilirubinLevel(riskFactorCount, gestationalAge, postnatalAge);
+    const calculatedTSB = getBilirubinLevel(
+      riskFactorCount,
+      gestationalAge,
+      postnatalAge
+    );
     setFormData((prev) => ({ ...prev, tsbLevel: calculatedTSB }));
   };
 
   return (
     <main className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
-
         {/* LinkedIn Button at the Top */}
-        <Box textAlign="right" borderBottom="1px solid" mb={4}>
-          <Text fontSize="sm" mt={3}>
-            Created by{" "}
-            <Box
-              as="a"
-              href="https://www.linkedin.com/in/fimilfaneea/"
-              target="_blank"
-              color="blue.500"
-              fontWeight="bold"
-              _hover={{ textDecoration: "underline" }}
-            >
-              Fimil
-            </Box>
-          </Text>
-        </Box>
 
-        <h1 className="text-2xl font-bold text-black mb-6">Bilirubin Risk Assessment</h1>
+        <Link
+          href="https://www.linkedin.com/in/fimilfaneea/"
+          target="_blank"
+          color="blue.500"
+          fontWeight="bold"
+          _hover={{ textDecoration: "underline" }}
+        >
+          Fimil
+        </Link>
+
+        <h1 className="text-2xl font-bold text-black mb-6">
+          Bilirubin Risk Assessment
+        </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Gestational Age Dropdown */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Gestational Age (weeks)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Gestational Age (weeks)
+            </label>
             <input
               type="range"
               name="gestationalAge"
               min="23"
               max="40"
-              value={formData.gestationalAge === "40+" ? "40" : formData.gestationalAge}
+              value={
+                formData.gestationalAge === "40+"
+                  ? "40"
+                  : formData.gestationalAge
+              }
               onChange={(e) => {
                 const value = parseInt(e.target.value, 10);
                 setFormData({
                   ...formData,
-                  gestationalAge: value === 40 && formData.gestationalAge === "40+" ? "40+" : String(value),
+                  gestationalAge:
+                    value === 40 && formData.gestationalAge === "40+"
+                      ? "40+"
+                      : String(value),
                 });
               }}
               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
             />
-            <p className="mt-2 text-lg text-gray-500 text-center">{formData.gestationalAge} weeks</p>
+            <p className="mt-2 text-lg text-gray-500 text-center">
+              {formData.gestationalAge} weeks
+            </p>
           </div>
 
           {/* Age Input */}
           <AgeInput formData={formData} setFormData={setFormData} />
 
           {/* Risk Factors */}
-          {formData.gestationalAge === "" || Number(formData.gestationalAge) > 34 ? (
+          {formData.gestationalAge === "" ||
+          Number(formData.gestationalAge) > 34 ? (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Risk Factors</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Risk Factors
+              </label>
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -188,22 +208,34 @@ export default function Home() {
                   checked={Object.values(formData.riskFactors).some(Boolean)}
                   onChange={(e) => {
                     const checked = e.target.checked;
-                    const updatedRiskFactors = Object.keys(formData.riskFactors).reduce(
+                    const updatedRiskFactors = Object.keys(
+                      formData.riskFactors
+                    ).reduce(
                       (acc, key) => ({ ...acc, [key]: checked }),
                       {} as RiskFactors
                     );
-                    handleInputChange({ name: "riskFactors", value: updatedRiskFactors });
+                    handleInputChange({
+                      name: "riskFactors",
+                      value: updatedRiskFactors,
+                    });
                   }}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="anyRiskFactor" className="ml-2 text-sm text-gray-600">
-                  Any Risk Factor Present (Gestational age &lt;38 weeks, Albumin &lt;3.0 g/dL, etc.)
+                <label
+                  htmlFor="anyRiskFactor"
+                  className="ml-2 text-sm text-gray-600"
+                >
+                  Any Risk Factor Present (Gestational age &lt;38 weeks, Albumin
+                  &lt;3.0 g/dL, etc.)
                 </label>
               </div>
             </div>
           ) : null}
 
-          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-md">
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded-md"
+          >
             Calculate Risk
           </button>
         </form>
