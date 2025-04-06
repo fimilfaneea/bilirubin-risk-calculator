@@ -153,7 +153,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-8 bg-gray-50">
-      <div className="text-center border-t border-gray-200 pt-3 mb-6">
+      <div className="text-center pt-3 mb-6">
         <p className="text-sm text-gray-600">
           Created by{" "}
           <a
