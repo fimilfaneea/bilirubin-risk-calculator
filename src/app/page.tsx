@@ -203,6 +203,13 @@ export default function Home() {
             Calculate Risk
           </button>
         </form>
+
+        {showTSB && formData.tsbLevel !== null && (
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h2 className="text-lg font-semibold text-blue-800 mb-2">Total Serum Bilirubin Level</h2>
+            <p className="text-2xl font-bold text-blue-900">{formData.tsbLevel.toFixed(1)} mg/dL</p>
+          </div>
+        )}
       </div>
     </main>
   );
