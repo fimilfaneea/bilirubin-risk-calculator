@@ -1,23 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { getBilirubinLevel } from "./bilirubin";
 import { Link } from "@chakra-ui/react";
-
-type RiskFactors = {
-  gestationalAgeUnder38: boolean;
-  albuminUnder3: boolean;
-  g6pdDeficiency: boolean;
-  hemolyticDisease: boolean;
-  sepsis: boolean;
-  clinicalInstability: boolean;
-};
+import {
+  getBilirubinLevelPreBorn,
+  getBilirubinLevelRiskFactor,
+  getBilirubinLevelNoRiskFactor,
+} from "./bilirubin";
 
 type FormData = {
   gestationalAge: string;
   age: string;
   tsbLevel: number | null;
-  riskFactors: RiskFactors;
+  riskFactors: boolean;
 };
 
 type AgeInputProps = {
@@ -77,23 +72,16 @@ const AgeInput = ({ formData, setFormData }: AgeInputProps) => {
 
 export default function Home() {
   const [formData, setFormData] = useState<FormData>({
-    gestationalAge: "Select ",
+    gestationalAge: "Select",
     age: "",
     tsbLevel: null,
-    riskFactors: {
-      gestationalAgeUnder38: false,
-      albuminUnder3: false,
-      g6pdDeficiency: false,
-      hemolyticDisease: false,
-      sepsis: false,
-      clinicalInstability: false,
-    },
+    riskFactors: false,
   });
 
   const handleInputChange = (
     e:
       | React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-      | { name: keyof FormData; value: string | number | RiskFactors }
+      | { name: keyof FormData; value: string | number | boolean }
   ) => {
     if ("target" in e) {
       const { name, value, type } = e.target;
@@ -102,10 +90,7 @@ export default function Home() {
         const checkbox = e.target as HTMLInputElement;
         setFormData((prev) => ({
           ...prev,
-          riskFactors: {
-            ...prev.riskFactors,
-            [name]: checkbox.checked,
-          },
+          [name]: checkbox.checked,
         }));
       } else {
         setFormData((prev) => ({
@@ -124,17 +109,23 @@ export default function Home() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const riskFactorCount = Object.values(formData.riskFactors).filter(
-      Boolean
-    ).length;
+    const riskFactor = formData.riskFactors; // already a boolean
     const gestationalAge = parseInt(formData.gestationalAge, 10);
     const postnatalAge = parseFloat(formData.age);
 
-    const calculatedTSB = getBilirubinLevel(
-      riskFactorCount,
-      gestationalAge,
-      postnatalAge
-    );
+    let calculatedTSB: number;
+
+    if (gestationalAge <= 34) {
+      calculatedTSB = getBilirubinLevelPreBorn(gestationalAge, postnatalAge);
+    } else if (riskFactor && gestationalAge >= 35) {
+      calculatedTSB = getBilirubinLevelRiskFactor(gestationalAge, postnatalAge);
+    } else {
+      calculatedTSB = getBilirubinLevelNoRiskFactor(
+        gestationalAge,
+        postnatalAge
+      );
+    }
+
     setFormData((prev) => ({ ...prev, tsbLevel: calculatedTSB }));
   };
 
@@ -142,7 +133,6 @@ export default function Home() {
     <main className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
         {/* LinkedIn Button at the Top */}
-
         <Link
           href="https://www.linkedin.com/in/fimilfaneea/"
           target="_blank"
@@ -194,43 +184,31 @@ export default function Home() {
           <AgeInput formData={formData} setFormData={setFormData} />
 
           {/* Risk Factors */}
-          {formData.gestationalAge === "" ||
-          Number(formData.gestationalAge) > 34 ? (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Risk Factors
-              </label>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="anyRiskFactor"
-                  name="anyRiskFactor"
-                  checked={Object.values(formData.riskFactors).some(Boolean)}
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    const updatedRiskFactors = Object.keys(
-                      formData.riskFactors
-                    ).reduce(
-                      (acc, key) => ({ ...acc, [key]: checked }),
-                      {} as RiskFactors
-                    );
-                    handleInputChange({
-                      name: "riskFactors",
-                      value: updatedRiskFactors,
-                    });
-                  }}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="anyRiskFactor"
-                  className="ml-2 text-sm text-gray-600"
-                >
-                  Any Risk Factor Present (Gestational age &lt;38 weeks, Albumin
-                  &lt;3.0 g/dL, etc.)
+          {formData.gestationalAge !== "" &&
+            Number(formData.gestationalAge) > 34 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Risk Factors
                 </label>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="riskFactors"
+                    name="riskFactors"
+                    checked={formData.riskFactors}
+                    onChange={handleInputChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label
+                    htmlFor="riskFactors"
+                    className="ml-2 text-sm text-gray-600"
+                  >
+                    Any Risk Factor Present (Gestational age &lt;38 weeks,
+                    Albumin &lt;3.0 g/dL, etc.)
+                  </label>
+                </div>
               </div>
-            </div>
-          ) : null}
+            )}
 
           <button
             type="submit"
@@ -239,6 +217,21 @@ export default function Home() {
             Calculate Risk
           </button>
         </form>
+
+        {/* Display TSB Level */}
+        {formData.tsbLevel !== null && (
+          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+              Results
+            </h2>
+            <p className="text-lg text-gray-700">
+              Threshold Serum Bilirubin Level:{" "}
+              <span className="font-bold">
+                {formData.tsbLevel.toFixed(1)} mg/dL
+              </span>
+            </p>
+          </div>
+        )}
       </div>
     </main>
   );

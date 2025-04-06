@@ -1,71 +1,171 @@
-const bilirubinLevelsWithRisk: Record<number, number[][]> = { 
-  38: [
-    [6, 8, 10, 12, 14, 16, 18, 18.5], // 0-96 hours
-    Array(10).fill(18.5), // 96+ hours
-  ],
-  37: [
-    [5.5, 7.5, 9.5, 11.5, 13.5, 15.5, 17.5, 18], 
-    Array(10).fill(18.5),
-  ],
-  36: [
-    [5, 7, 9, 11, 13, 15, 17, 17.8], 
-    Array(10).fill(18.5),
-  ],
-  35: [
-    [4.5, 6.5, 8.5, 10.5, 12.5, 14.5, 16.5, 17.3], 
-    Array(10).fill(18.5),
-  ],
-};
+// Accurate bilirubin thresholds WITH risk factor
+const bilirubinLevelsWithRisk: [number, Record<number, number>][] = [
+  [0, { 38: 6.2, 37: 6, 36: 5.5, 35: 5 }],
+  [12, { 38: 8.5, 37: 8, 36: 7.5, 35: 7 }],
+  [24, { 38: 10.5, 37: 10, 36: 9.5, 35: 9 }],
+  [36, { 38: 12, 37: 12, 36: 11.5, 35: 10.5 }],
+  [48, { 38: 14, 37: 13.5, 36: 13, 35: 12 }],
+  [60, { 38: 15.5, 37: 15, 36: 14.2, 35: 13.5 }],
+  [72, { 38: 16.5, 37: 16, 36: 15.2, 35: 14.5 }],
+  [84, { 38: 17.5, 37: 17, 36: 16.2, 35: 15.5 }],
+  [96, { 38: 18.2, 37: 17.9, 36: 17.1, 35: 16.1 }],
+  [108, { 38: 18.2, 37: 17.9, 36: 17.2, 35: 16.2 }],
+  [120, { 38: 18.2, 37: 18, 36: 17.3, 35: 16.3 }],
+  [132, { 38: 18.2, 37: 18.1, 36: 17.4, 35: 16.4 }],
+  [144, { 38: 18.2, 37: 18.2, 36: 17.5, 35: 16.5 }],
+  [168, { 38: 18.2, 37: 18.2, 36: 17.6, 35: 16.6 }],
+  [192, { 38: 18.2, 37: 18.2, 36: 17.7, 35: 16.7 }],
+  [216, { 38: 18.2, 37: 18.2, 36: 17.8, 35: 16.8 }],
+  [240, { 38: 18.2, 37: 18.2, 36: 17.9, 35: 16.9 }],
+  [264, { 38: 18.2, 37: 18.2, 36: 18.0, 35: 17.0 }],
+  [288, { 38: 18.2, 37: 18.2, 36: 18.1, 35: 17.1 }],
+  [312, { 38: 18.2, 37: 18.2, 36: 18.2, 35: 17.2 }],
+  [336, { 38: 18.2, 37: 18.2, 36: 18.2, 35: 17.3 }],
+];
 
-// No risk factor values (slightly lower values)
-const bilirubinLevelsNoRisk: Record<number, number[][]> = { 
-  38: [
-    [5, 7, 9, 11, 13, 15, 17, 17.5], // 0-96 hours
-    Array(10).fill(17.5), // 96+ hours
+// If you have values without risk, define like this:
+const bilirubinLevelsNoRisk: [number, Record<number, number>][] = [
+  [0, { 40: 9, 39: 6, 38: 8, 37: 7, 36: 6, 35: 6.5 }],
+  [12, { 40: 11, 39: 7, 38: 10, 37: 7.5, 36: 9, 35: 8.3 }],
+  [24, { 40: 13.5, 39: 8, 38: 12, 37: 11.5, 36: 11, 35: 10.9 }],
+  [36, { 40: 15, 39: 9, 38: 14, 37: 13.5, 36: 13, 35: 12.5 }],
+  [48, { 40: 17, 39: 10, 38: 16, 37: 15.4, 36: 14.9, 35: 14 }],
+  [60, { 40: 18.5, 39: 11, 38: 17.5, 37: 17, 36: 16.2, 35: 15.8 }],
+  [72, { 40: 20, 39: 12, 38: 17.8, 37: 18.1, 36: 17.5, 35: 17 }],
+  [84, { 40: 21.8, 39: 13, 38: 20, 37: 19.1, 36: 18.5, 35: 18 }],
+  [96, { 40: 21.81, 39: 21.5, 38: 20.9, 37: 20, 36: 19.2, 35: 18.5 }],
+  [108, { 40: 21.82, 39: 21.5225, 38: 20.96, 37: 20.05, 36: 19.26, 35: 18.55 }],
+  [120, { 40: 21.83, 39: 21.545, 38: 21.01, 37: 20.1, 36: 19.32, 35: 18.59 }],
+  [132, { 40: 21.84, 39: 21.5675, 38: 21.07, 37: 20.15, 36: 19.38, 35: 18.64 }],
+  [144, { 40: 21.85, 39: 21.59, 38: 21.12, 37: 20.2, 36: 19.44, 35: 18.68 }],
+  [156, { 40: 21.85, 39: 21.6125, 38: 21.18, 37: 20.25, 36: 19.5, 35: 18.73 }],
+  [168, { 40: 21.86, 39: 21.635, 38: 21.23, 37: 20.3, 36: 19.56, 35: 18.77 }],
+  [180, { 40: 21.87, 39: 21.6575, 38: 21.29, 37: 20.35, 36: 19.62, 35: 18.82 }],
+  [192, { 40: 21.88, 39: 21.68, 38: 21.34, 37: 20.4, 36: 19.68, 35: 18.86 }],
+  [204, { 40: 21.89, 39: 21.7025, 38: 21.4, 37: 20.45, 36: 19.74, 35: 18.91 }],
+  [216, { 40: 21.9, 39: 21.725, 38: 21.45, 37: 20.5, 36: 19.8, 35: 18.95 }],
+  [228, { 40: 21.91, 39: 21.7475, 38: 21.51, 37: 20.55, 36: 19.86, 35: 19 }],
+  [240, { 40: 21.92, 39: 21.77, 38: 21.56, 37: 20.6, 36: 19.92, 35: 19.04 }],
+  [252, { 40: 21.93, 39: 21.7925, 38: 21.62, 37: 20.65, 36: 19.98, 35: 19.09 }],
+  [264, { 40: 21.94, 39: 21.815, 38: 21.67, 37: 20.7, 36: 20.04, 35: 19.13 }],
+  [276, { 40: 21.94, 39: 21.8375, 38: 21.73, 37: 20.75, 36: 20.1, 35: 19.18 }],
+  [288, { 40: 21.95, 39: 21.86, 38: 21.78, 37: 20.8, 36: 20.16, 35: 19.22 }],
+  [300, { 40: 21.96, 39: 21.8825, 38: 21.84, 37: 20.85, 36: 20.22, 35: 19.27 }],
+  [312, { 40: 21.96, 39: 21.905, 38: 21.89, 37: 20.9, 36: 20.28, 35: 19.31 }],
+  [324, { 40: 21.96, 39: 21.9275, 38: 21.95, 37: 20.95, 36: 20.34, 35: 19.36 }],
+  [336, { 40: 21.95, 39: 21.95, 38: 21.95, 37: 21, 36: 20.4, 35: 19.4 }],
+];
+// Preterm bilirubin thresholds
+const bilirubinLevelsPreterm: [number, Record<number, number>][] = [
+  [
+    12,
+    {
+      23: 3.2,
+      24: 3.2,
+      25: 3.5,
+      26: 3.5,
+      27: 3.6,
+      28: 3.8,
+      29: 3.8,
+      30: 4.0,
+      31: 4.1,
+      32: 4.1,
+      33: 4.2,
+      34: 4.2,
+    },
   ],
-  37: [
-    [4.5, 6.5, 8.5, 10.5, 12.5, 14.5, 16.5, 17], 
-    Array(10).fill(17.5),
+  [
+    24,
+    {
+      23: 4.0,
+      24: 4.4,
+      25: 4.7,
+      26: 4.7,
+      27: 5.0,
+      28: 5.0,
+      29: 5.3,
+      30: 5.3,
+      31: 5.6,
+      32: 5.9,
+      33: 6.1,
+      34: 6.1,
+    },
   ],
-  36: [
-    [4, 6, 8, 10, 12, 14, 16, 16.8], 
-    Array(10).fill(17.5),
+  [
+    48,
+    {
+      23: 5.9,
+      24: 6.4,
+      25: 6.7,
+      26: 7.0,
+      27: 7.3,
+      28: 7.6,
+      29: 8.2,
+      30: 8.5,
+      31: 9.0,
+      32: 9.4,
+      33: 9.9,
+      34: 10.2,
+    },
   ],
-  35: [
-    [3.5, 5.5, 7.5, 9.5, 11.5, 13.5, 15.5, 16.3], 
-    Array(10).fill(17.5),
+  [
+    72,
+    {
+      23: 7.6,
+      24: 8.2,
+      25: 8.8,
+      26: 9.4,
+      27: 10.0,
+      28: 10.5,
+      29: 11.1,
+      30: 11.7,
+      31: 12.3,
+      32: 12.9,
+      33: 13.5,
+      34: 14.0,
+    },
   ],
-};
+];
 
-export const getBilirubinLevel = (
-  riskFactorCount: number,
+export function getNearestAge<T>(age: number, table: [number, T][]): T {
+  for (let i = table.length - 1; i >= 0; i--) {
+    if (age >= table[i][0]) {
+      return table[i][1];
+    }
+  }
+  // If age is lower than the first entry
+  return table[0][1];
+}
+
+export function getNearestGestAge<T>(gestAge: number, levels: Record<number, T>): T {
+  const availableAges = Object.keys(levels).map(Number);
+  let nearest = availableAges[0];
+  for (const age of availableAges) {
+    if (gestAge >= age) nearest = age;
+  }
+  return levels[nearest];
+}
+
+export function getBilirubinLevelRiskFactor(
   gestationalAge: number,
   postnatalAge: number
-): number | null => {
-  // Select the appropriate dataset
-  const levels = riskFactorCount > 0 ? bilirubinLevelsWithRisk : bilirubinLevelsNoRisk;
-  
-  if (!levels[gestationalAge]) return null; // Unsupported gestational age
+): number {
+  const levelAtTime = getNearestAge(postnatalAge, bilirubinLevelsWithRisk);
+  return getNearestGestAge(gestationalAge, levelAtTime);
+}
 
-  const ageGroups = levels[gestationalAge];
+export function getBilirubinLevelNoRiskFactor(
+  gestationalAge: number,
+  postnatalAge: number
+): number {
+  const levelAtTime = getNearestAge(postnatalAge, bilirubinLevelsNoRisk);
+  return getNearestGestAge(gestationalAge, levelAtTime);
+}
 
-  // Determine index based on postnatal age
-  const index =
-    postnatalAge <= 12 ? 0 :
-    postnatalAge <= 24 ? 1 :
-    postnatalAge <= 36 ? 2 :
-    postnatalAge <= 48 ? 3 :
-    postnatalAge <= 60 ? 4 :
-    postnatalAge <= 72 ? 5 :
-    postnatalAge <= 84 ? 6 :
-    postnatalAge <= 96 ? 7 : 8;
-
-  return ageGroups[index >= 8 ? 1 : 0][index >= 8 ? index - 8 : index];
-};
-
-// Example usage:
-console.log(getBilirubinLevel(1, 36, 48));  // Should return 11 (with risk)
-console.log(getBilirubinLevel(0, 37, 72));  // Should return 14.5 (no risk)
-console.log(getBilirubinLevel(2, 35, 120)); // Should return 18.5 (with risk)
-console.log(getBilirubinLevel(0, 38, 120)); // Should return 17.5 (no risk)
-console.log(getBilirubinLevel(0, 34, 48));  // Should return null (unsupported age)
+export function getBilirubinLevelPreBorn(
+  gestationalAge: number,
+  postnatalAge: number
+): number {
+  const levelAtTime = getNearestAge(postnatalAge, bilirubinLevelsPreterm);
+  return getNearestGestAge(gestationalAge, levelAtTime);
+}
