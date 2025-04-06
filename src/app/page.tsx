@@ -152,7 +152,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
+    <main className="min-h-screen bg-gray-50">
       <div className="text-center mb-10">
         <p className="text-sm text-gray-600">
           Created by{" "}
@@ -166,7 +166,7 @@ export default function Home() {
           </a>
         </p>
       </div>
-      <main className="min-h-screen p-8 bg-gray-50">
+      <main className="min-h-screen p-3 bg-gray-50">
         <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
           <h1 className="text-2xl font-bold text-black mb-6">
             Bilirubin Risk Assessment
