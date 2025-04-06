@@ -146,6 +146,20 @@ export default function Home() {
     <main className="min-h-screen p-8 bg-gray-50">
       <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
         <h1 className="text-2xl font-bold text-black mb-6">Bilirubin Risk Assessment</h1>
+        
+        <div className="text-right border-t border-gray-200 pt-3 mb-6">
+          <p className="text-sm text-gray-600">
+            Created by{" "}
+            <a
+              href="https://www.linkedin.com/in/fimilfaneea/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 font-bold hover:underline"
+            >
+              Fimil
+            </a>
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Gestational Age Dropdown */}
