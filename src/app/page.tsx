@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { getBilirubinLevel } from "./bilirubin";
+import {
+  getBilirubinLevelPreBorn,
+  getBilirubinLevelRiskFactor,
+  getBilirubinLevelNoRiskFactor,
+} from "./bilirubin";
 
 type RiskFactors = {
   gestationalAgeUnder38: boolean;
@@ -125,7 +129,15 @@ export default function Home() {
     const gestationalAge = parseInt(formData.gestationalAge, 10);
     const postnatalAge = parseFloat(formData.age);
 
-    const calculatedTSB = getBilirubinLevel(riskFactorCount, gestationalAge, postnatalAge);
+    let calculatedTSB: number;
+    if (gestationalAge <= 34) {
+      calculatedTSB = getBilirubinLevelPreBorn(gestationalAge, postnatalAge);
+    } else if (riskFactorCount > 0) {
+      calculatedTSB = getBilirubinLevelRiskFactor(gestationalAge, postnatalAge);
+    } else {
+      calculatedTSB = getBilirubinLevelNoRiskFactor(gestationalAge, postnatalAge);
+    }
+
     setFormData((prev) => ({ ...prev, tsbLevel: calculatedTSB }));
     setShowTSB(true);
   };
