@@ -152,8 +152,8 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
-      <div className="text-center mb-10">
+    <main className="min-h-screen bg-gray-50">
+      <div className="text-center mb-15">
         <p className="text-sm text-gray-600">
           Created by{" "}
           <a
