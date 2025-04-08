@@ -11,6 +11,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Bilirubin Risk Calculator",
   description: "To make pediac life easier",
+  verification: {
+    google: 'google656d1b0a5a969e0d',
+  },
 };
 
 export default function RootLayout({
